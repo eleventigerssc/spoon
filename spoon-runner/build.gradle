@@ -48,3 +48,16 @@ apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
 artifacts {
   archives shadowJar
 }
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      groupId = group
+      version = version
+
+      artifact shadowJar {
+        classifier = 'all'
+      }
+    }
+  }
+}

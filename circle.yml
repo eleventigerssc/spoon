@@ -1,0 +1,49 @@
+machine:
+  post:
+    - echo ${GCLOUD_SERVICE_KEY} | base64 --decode > ${HOME}/gcloud-service-key.json
+    - /opt/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+  java:
+    version: 'oraclejdk8'
+  environment:
+    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx512m -Xmx3072m -XX:+HeapDumpOnOutOfMemoryError"'
+    # Disable gradle fancy single line output
+    TERM: dumb
+    GOOGLE_APPLICATION_CREDENTIALS: ${HOME}/gcloud-service-key.json
+
+dependencies:
+  cache_directories:
+    - /home/ubuntu/.gradle
+    - /usr/local/android-sdk-linux/platforms/android-26
+    - /usr/local/android-sdk-linux/build-tools/26.0.2
+    - /usr/local/android-sdk-linux/extras/android/m2repository
+  pre:
+    # hack for android sdkDownload
+    - mkdir "$ANDROID_HOME/licenses" || true
+    - echo -e "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
+    - echo -e "84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+    - echo y | android update sdk --no-ui --all --filter "platform-tools"
+    - if [ ! -d "/usr/local/android-sdk-linux/platforms/android-26" ]; then echo y | android update sdk --no-ui --all --filter "android-26"; fi
+    - if [ ! -d "/usr/local/android-sdk-linux/build-tools/26.0.2" ]; then echo y | android update sdk --no-ui --all --filter "build-tools-26.0.2"; fi
+  override:
+    - ./gradlew -s dependencies:
+        timeout: 1800
+
+compile:
+  override:
+    - ./gradlew -s clean assemble:
+        timeout: 1800
+
+test:
+  override:
+    - ./gradlew -s check --info:
+        timeout: 1800
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/reports/
+    - find . -type f -regex ".*/build/reports/.*html" -exec cp {} $CIRCLE_TEST_REPORTS/reports/ \;
+
+deployment:
+  publish:
+    branch: /.*/
+    commands:
+      - ./gradlew publish:
+          timeout: 1800
