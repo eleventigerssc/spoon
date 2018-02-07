@@ -95,4 +95,19 @@ subprojects { project ->
       }
     }
   }
+
+  apply plugin: 'maven-publish'
+
+  publishing {
+    repositories {
+      maven {
+        url 'gcs://snapengine-maven-publish/releases'
+      }
+    }
+  }
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.5'
+  distributionUrl = distributionUrl.replace('bin', 'all')
 }

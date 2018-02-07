@@ -13,7 +13,8 @@ import java.util.regex.Pattern;
 
 final class SpoonDeviceLogger implements LogCatListener {
   private static final String TEST_RUNNER = "TestRunner";
-  private static final String CRASH_DUMPER_SIGNATURE = "*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***";
+  private static final String CRASH_DUMPER_SIGNATURE =
+          "*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***";
   private static final Pattern MESSAGE_START = Pattern.compile("started: ([^(]+)\\(([^)]+)\\)");
   private static final Pattern MESSAGE_END = Pattern.compile("finished: [^(]+\\([^)]+\\)");
 
