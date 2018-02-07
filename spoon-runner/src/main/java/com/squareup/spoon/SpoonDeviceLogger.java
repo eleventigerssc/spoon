@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 final class SpoonDeviceLogger implements LogCatListener {
   private static final String TEST_RUNNER = "TestRunner";
+  private static final String CRASH_DUMPER_SIGNATURE = "*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***";
   private static final Pattern MESSAGE_START = Pattern.compile("started: ([^(]+)\\(([^)]+)\\)");
   private static final Pattern MESSAGE_END = Pattern.compile("finished: [^(]+\\([^)]+\\)");
 
@@ -40,6 +41,7 @@ final class SpoonDeviceLogger implements LogCatListener {
     Map<DeviceTest, List<LogCatMessage>> logs = new HashMap<>();
     DeviceTest current = null;
     int pid = -1;
+    int crashDumperPid = -1;
     synchronized (messages) {
       for (LogCatMessage message : messages) {
         if (current == null) {
@@ -53,8 +55,12 @@ final class SpoonDeviceLogger implements LogCatListener {
             logs.put(current, deviceLogMessages);
           }
         } else {
-          // Only log messages from the same PID.
-          if (pid == message.getPid()) {
+          if (CRASH_DUMPER_SIGNATURE.equals(message.getMessage())) {
+            crashDumperPid = message.getPid();
+          }
+          // Log messages from the same PID and possible native crash report
+          int messagePid = message.getPid();
+          if (pid == messagePid || crashDumperPid == messagePid) {
             logs.get(current).add(message);
           }
 
@@ -62,6 +68,7 @@ final class SpoonDeviceLogger implements LogCatListener {
           if (match.matches() && TEST_RUNNER.equals(message.getTag())) {
             current = null;
             pid = -1;
+            crashDumperPid = -1;
           }
         }
       }
