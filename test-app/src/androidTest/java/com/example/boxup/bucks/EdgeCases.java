@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 public final class EdgeCases {
+
   private static final int SIGABRT = 6; // http://man7.org/linux/man-pages/man7/signal.7.html
 
   @Test @Ignore("Message!") public void ignored() {
