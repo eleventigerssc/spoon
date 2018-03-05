@@ -31,6 +31,26 @@ class CliArgsTest {
   }
 
   @Test
+  fun parserInstrumentationArgsOnlyTestApkTest() {
+    val args = arrayOf(
+            "app-androidTest.apk",
+            "-e",
+            "package",
+            "com.sample.testsuites",
+            "--output",
+            "outputs/spoon"
+    )
+    val parser = ArgParser(args)
+    val cliArgs = CliArgs(parser)
+
+    assertThat(cliArgs.testApk.name).isEqualTo("app-androidTest.apk")
+    assertThat(cliArgs.otherApks).isEmpty()
+    assertThat(cliArgs.instrumentationArgs?.get("package"))
+            .isEqualTo("com.sample.testsuites")
+    assertThat(cliArgs.output?.path).isEqualTo("outputs/spoon")
+  }
+
+  @Test
   fun parserNullInstrumentationArgsTest() {
     val args = arrayOf(
         "app-androidTest.apk",

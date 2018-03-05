@@ -13,6 +13,7 @@ internal class CliArgs(parser: ArgParser) {
 
   val otherApks by parser.positionalList("OTHER_APK",
       "Other APKs to install before test APK (e.g., main app or helper/buddy APKs)",
+      0..Int.MAX_VALUE,
       transform = ::File)
 
   val title by parser.storing("Execution title").default(null)
